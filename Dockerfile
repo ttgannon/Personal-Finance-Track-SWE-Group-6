@@ -1,11 +1,17 @@
 # The Dockerfile runs on the web service build command. It imports the requirements, 
 # establishes listening ports, and runs entrypoint.sh.  
+FROM node:20 AS frontend
+WORKDIR /app/frontend
+COPY frontend/package.json ./
+RUN npm install
+COPY frontend/tsconfig.json frontend/vite.config.ts ./
+COPY frontend/index.html ./
+COPY frontend/src ./src
+RUN npm run build
+
 FROM python:3.12
-
 WORKDIR /app
-
 COPY . /app/.
-
 RUN pip install --upgrade pip 
 RUN pip install --no-cache-dir -r requirements.txt
 
