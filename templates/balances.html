@@ -1,94 +1,300 @@
 {% extends 'dashboard_base.html' %}
 
 {% block content %}
-<h2 class="mb-4">Balances</h2>
+<div class="balances-container">
+    <div class="glass-card">
+        <div class="card-header">
+            <h2>Account Balances</h2>
+            <button class="btn-primary" data-bs-toggle="modal" data-bs-target="#addAccountModal">
+                <i class="bi bi-plus-circle"></i> Add Account
+            </button>
+        </div>
+    </div>
 
-<div class="row">
-    {% for account in accounts %}
-    <div class="col-md-4 mb-4">
-        <div class="account-card">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h5>{{ account.account_type|title }}</h5>
-                    <small class="text-muted">{{ account.bank_name }}</small>
+    <div class="grid">
+        {% for account in accounts %}
+        <div class="glass-card account-card">
+            <div class="account-header">
+                <div class="account-info">
+                    <h3>{{ account.account_type|title }}</h3>
+                    <small class="bank-name">{{ account.bank_name }}</small>
                 </div>
                 {% if account.account_type == 'credit' %}
-                <img src="https://www.mastercard.com/content/dam/public/brandcenter/assets/images/logos/mclogo-for-footer.svg" height="30">
+                <img src="https://www.mastercard.com/content/dam/public/brandcenter/assets/images/logos/mclogo-for-footer.svg" height="30" alt="Mastercard">
                 {% elif account.account_type == 'checking' or account.account_type == 'savings' %}
-                <img src="https://1000logos.net/wp-content/uploads/2021/05/Visa-logo.png" height="30">
+                <img src="https://1000logos.net/wp-content/uploads/2021/05/Visa-logo.png" height="30" alt="Visa">
                 {% endif %}
             </div>
-            <div class="account-number mt-2">
+            <div class="account-number">
                 {{ account.account_number }}
             </div>
             <div class="account-balance">
                 ${{ account.balance }}
             </div>
-            <div class="d-flex justify-content-between">
+            <div class="account-actions">
                 <form method="post" action="{% url 'remove_account' account.id %}" style="display: inline;">
                     {% csrf_token %}
-                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to remove this account?')">
-                        Remove
+                    <button type="submit" class="btn-secondary" onclick="return confirm('Are you sure you want to remove this account?')">
+                        <i class="bi bi-trash"></i> Remove
                     </button>
                 </form>
-                <a href="#" class="btn btn-primary btn-sm">Details</a>
+                <button class="btn-primary">
+                    <i class="bi bi-eye"></i> Details
+                </button>
             </div>
         </div>
-    </div>
-    {% endfor %}
-    
-    <div class="col-md-4 mb-4">
-        <div class="add-account-card" data-bs-toggle="modal" data-bs-target="#addAccountModal">
-            <i class="bi bi-plus-circle" style="font-size: 2rem;"></i>
-            <div class="mt-2">Add Accounts</div>
+        {% endfor %}
+
+        <div class="glass-card add-account-card" data-bs-toggle="modal" data-bs-target="#addAccountModal">
+            <i class="bi bi-plus-circle"></i>
+            <div>Add New Account</div>
         </div>
     </div>
 </div>
 
 <!-- Add Account Modal -->
-<div class="modal fade" id="addAccountModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Add New Account</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <form method="post" action="{% url 'add_account' %}">
-                {% csrf_token %}
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">Account Type</label>
-                        <select name="account_type" class="form-select" required>
-                            <option value="credit">Credit Card</option>
-                            <option value="checking">Checking</option>
-                            <option value="savings">Savings</option>
-                            <option value="investment">Investment</option>
-                            <option value="loan">Loan</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Bank Name</label>
-                        <input type="text" name="bank_name" class="form-control" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Account Name</label>
-                        <input type="text" name="account_name" class="form-control" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Account Number</label>
-                        <input type="text" name="account_number" class="form-control" maxlength="16" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Balance</label>
-                        <input type="number" name="balance" class="form-control" step="0.01" required>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Add Account</button>
-                </div>
-            </form>
+<div class="modal-overlay" id="addAccountModal" style="display: none;">
+    <div class="modal-content glass-card">
+        <div class="modal-header">
+            <h3>Add New Account</h3>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
         </div>
+        <form method="post" action="{% url 'add_account' %}">
+            {% csrf_token %}
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Account Type</label>
+                    <select name="account_type" class="form-control" required>
+                        <option value="credit">Credit Card</option>
+                        <option value="checking">Checking</option>
+                        <option value="savings">Savings</option>
+                        <option value="investment">Investment</option>
+                        <option value="loan">Loan</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Bank Name</label>
+                    <input type="text" name="bank_name" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Account Name</label>
+                    <input type="text" name="account_name" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Account Number</label>
+                    <input type="text" name="account_number" class="form-control" maxlength="16" required>
+                </div>
+                <div class="form-group">
+                    <label>Balance</label>
+                    <input type="number" name="balance" class="form-control" step="0.01" required>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" onclick="closeModal()">Cancel</button>
+                <button type="submit" class="btn-primary">Add Account</button>
+            </div>
+        </form>
     </div>
 </div>
+
+<style>
+.balances-container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.account-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.account-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.account-info h3 {
+    margin: 0 0 0.25rem 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.bank-name {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.account-number {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    font-family: monospace;
+}
+
+.account-balance {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 1.5rem;
+}
+
+.account-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+}
+
+.account-actions button {
+    flex: 1;
+}
+
+.add-account-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px dashed var(--glass-border);
+}
+
+.add-account-card:hover {
+    border-color: var(--accent-primary);
+    background: rgba(99, 102, 241, 0.05);
+}
+
+.add-account-card i {
+    font-size: 3rem;
+    color: var(--accent-primary);
+    margin-bottom: 0.5rem;
+}
+
+.add-account-card div {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    max-width: 500px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.modal-close:hover {
+    background: var(--glass-border);
+    color: var(--text-primary);
+}
+
+.modal-body {
+    margin-bottom: 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.modal-footer {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+}
+
+@media (max-width: 768px) {
+    .account-header {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .account-actions {
+        flex-direction: column;
+    }
+
+    .modal-content {
+        width: 95%;
+        margin: 1rem;
+    }
+}
+</style>
+
+{% block extra_scripts %}
+<script>
+function closeModal() {
+    document.getElementById('addAccountModal').style.display = 'none';
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Show modal when add account card is clicked
+    document.querySelector('.add-account-card').addEventListener('click', function() {
+        document.getElementById('addAccountModal').style.display = 'flex';
+    });
+
+    // Close modal when clicking outside
+    document.getElementById('addAccountModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeModal();
+        }
+    });
+
+    // Close modal on escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeModal();
+        }
+    });
+});
+</script>
+{% endblock %}
 {% endblock %} 

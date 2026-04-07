@@ -6,7 +6,7 @@ from django.views.generic import CreateView
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.db.models import Q
-from .forms import CustomUserCreationForm, CustomPasswordChangeForm
+from .forms import CustomUserCreationForm, CustomPasswordChangeForm, CustomAuthenticationForm
 from .models import BankAccount, Bill, Transaction, Goal, Category, Budgets
 import random
 from datetime import datetime, timedelta
@@ -21,15 +21,16 @@ from datetime import timedelta
 
 class CustomLoginView(LoginView):
     template_name = 'registration/login.html'
+    form_class = CustomAuthenticationForm
     redirect_authenticated_user = True
     
     def get_success_url(self):
-        return reverse_lazy('app')
+        return reverse_lazy('home')
 
 class SignUpView(CreateView):
     form_class = CustomUserCreationForm
     template_name = 'registration/register.html'
-    success_url = reverse_lazy('app')
+    success_url = reverse_lazy('home')
     
     def form_valid(self, form):
         user = form.save()

@@ -4,26 +4,28 @@
 {% block content %}
 <div class="overview-container">
     <!-- Header Section -->
-    <div class="header-section">
-        <div class="greeting-section">
-            <h2>Hi {{ user.username }}</h2>
-            <span class="date">{{ current_date }}</span>
-        </div>
-        <div class="search-section">
-            <div class="search-container">
-                <input type="text" class="search-input" placeholder="Search here">
-                <i class="bi bi-search search-icon"></i>
+    <div class="glass-card">
+        <div class="header-section">
+            <div class="greeting-section">
+                <h2>Hi {{ user.username }}</h2>
+                <span class="date">{{ current_date }}</span>
             </div>
-            <div class="notification">
-                <i class="bi bi-bell"></i>
+            <div class="search-section">
+                <div class="search-container">
+                    <input type="text" class="form-control search-input" placeholder="Search here">
+                    <i class="bi bi-search search-icon"></i>
+                </div>
+                <div class="notification">
+                    <i class="bi bi-bell"></i>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Content Grid -->
-    <div class="content-grid">
+    <div class="grid">
         <!-- Total Balance Card -->
-        <div class="card balance-card">
+        <div class="glass-card balance-card">
             <div class="card-header">
                 <h3>Total Balance</h3>
                 <a href="{% url 'balances' %}" class="subtitle">All Accounts</a>
@@ -54,7 +56,7 @@
         </div>
 
         <!-- Goals Card -->
-        <div class="card goals-card">
+        <div class="glass-card goals-card">
             <div class="card-header">
                 <h3>Goals</h3>
                 <span class="date">{{ current_month }}</span>
@@ -80,7 +82,7 @@
                     <canvas id="goalGauge"></canvas>
                     <div class="gauge-label">Target vs Achievement</div>
                 </div>
-                <button class="edit-btn" onclick="adjustGoal('savings')">
+                <button class="btn-secondary edit-btn" onclick="adjustGoal('savings')">
                     <i class="bi bi-pencil"></i>
                     Edit
                 </button>
@@ -88,10 +90,10 @@
         </div>
 
         <!-- Upcoming Bills Card -->
-        <div class="card bills-card">
+        <div class="glass-card bills-card">
             <div class="card-header">
                 <h3>Upcoming Bill</h3>
-                <a href="{% url 'bills' %}" class="view-all">View All ></a>
+                <a href="{% url 'bills' %}" class="subtitle">View All ></a>
             </div>
             <div class="card-content">
                 {% for bill in upcoming_bills %}
@@ -116,7 +118,7 @@
         </div>
 
         <!-- Recent Transactions Card -->
-        <div class="card transactions-card">
+        <div class="glass-card transactions-card">
             <div class="card-header">
                 <h3>Recent Transaction</h3>
                 <div class="filter-buttons">
@@ -124,7 +126,7 @@
                     <button class="filter-btn" data-type="revenue">Revenue</button>
                     <button class="filter-btn" data-type="expense">Expenses</button>
                 </div>
-                <a href="{% url 'transactions' %}" class="view-all">View All ></a>
+                <a href="{% url 'transactions' %}" class="subtitle">View All ></a>
             </div>
             <div class="card-content">
                 <div class="transaction-list">
@@ -148,10 +150,10 @@
         </div>
 
         <!-- Statistics Card -->
-        <div class="card statistics-card">
+        <div class="glass-card statistics-card">
             <div class="card-header">
                 <h3>Statistics</h3>
-                <select class="time-range">
+                <select class="form-control time-range">
                     <option value="weekly">Weekly Comparison</option>
                     <option value="yearly">Yearly Comparison</option>
                 </select>
@@ -162,7 +164,7 @@
         </div>
 
         <!-- Expenses Breakdown Card -->
-        <div class="card expenses-card">
+        <div class="glass-card expenses-card">
             <div class="card-header">
                 <h3>Expenses Breakdown</h3>
                 <span class="compare-text">Compare to last month</span>
@@ -195,9 +197,649 @@
 
 <style>
 .overview-container {
-    padding: 16px;
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
+}
+
+.header-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.greeting-section h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.date {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.search-section {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.search-container {
+    position: relative;
+    width: 300px;
+}
+
+.search-input {
+    padding-right: 2.5rem;
+}
+
+.search-icon {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+    pointer-events: none;
+}
+
+.notification {
+    padding: 0.75rem;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.notification:hover {
+    background: var(--glass-border);
+}
+
+.notification i {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+}
+
+/* Balance Card Styles */
+.balance-card {
+    height: 280px;
+}
+
+.balance {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 1rem 0;
+    color: var(--text-primary);
+}
+
+.credit-card {
+    background: linear-gradient(45deg, #0a1f44, #1a365d);
+    border-radius: 12px;
+    padding: 1rem;
+    color: white;
+    margin: 1rem 0;
+    font-size: 0.8rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.credit-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, rgba(255,255,255,0.1), transparent);
+    pointer-events: none;
+}
+
+.card-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.nav-btn {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.nav-btn:hover {
+    background: var(--glass-border);
+    transform: scale(1.1);
+}
+
+.nav-dots {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--text-secondary);
+    transition: all 0.3s ease;
+}
+
+.dot.active {
+    background: var(--accent-primary);
+    transform: scale(1.2);
+}
+
+/* Goals Card Styles */
+.goals-card {
+    height: 280px;
+}
+
+.goal-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.target-achieved, .monthly-target {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: var(--glass-bg);
+    border-radius: 8px;
+}
+
+.target-achieved i, .monthly-target i {
+    font-size: 1.5rem;
+    color: var(--accent-primary);
+}
+
+.info {
+    display: flex;
+    flex-direction: column;
+}
+
+.label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.value {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.goal-gauge {
+    margin: 1.5rem 0;
+    text-align: center;
+    height: 120px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.gauge-label {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.edit-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+/* Bills Card Styles */
+.bills-card {
+    height: auto;
+    max-height: 400px;
+}
+
+.bills-card .card-content {
+    max-height: calc(100% - 80px);
+    overflow-y: auto;
+    padding-right: 0.25rem;
+}
+
+.bills-card .card-content::-webkit-scrollbar {
+    width: 4px;
+}
+
+.bills-card .card-content::-webkit-scrollbar-track {
+    background: var(--glass-bg);
+    border-radius: 2px;
+}
+
+.bills-card .card-content::-webkit-scrollbar-thumb {
+    background: var(--glass-border);
+    border-radius: 2px;
+}
+
+.bill-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.bill-item:last-child {
+    border-bottom: none;
+}
+
+.date-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: var(--glass-bg);
+    padding: 0.5rem;
+    border-radius: 8px;
+    min-width: 48px;
+    border: 1px solid var(--glass-border);
+}
+
+.date-box .month {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    font-weight: 500;
+}
+
+.date-box .day {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.bill-info {
+    flex: 1;
+}
+
+.bill-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.25rem;
+}
+
+.bill-title h4 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.bill-logo {
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+}
+
+.status {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.amount {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* Transactions Card Styles */
+.transactions-card {
+    grid-column: span 2;
+}
+
+.filter-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.filter-btn {
+    padding: 0.25rem 0.75rem;
+    border: 1px solid var(--glass-border);
+    background: var(--glass-bg);
+    border-radius: 6px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: var(--text-secondary);
+}
+
+.filter-btn.active {
+    background: var(--accent-primary);
+    color: white;
+    border-color: var(--accent-primary);
+}
+
+.transaction-list {
+    max-height: 300px;
+    overflow-y: auto;
+    padding-right: 0.25rem;
+}
+
+.transaction-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+.transaction-list::-webkit-scrollbar-track {
+    background: var(--glass-bg);
+    border-radius: 2px;
+}
+
+.transaction-list::-webkit-scrollbar-thumb {
+    background: var(--glass-border);
+    border-radius: 2px;
+}
+
+.transaction-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.transaction-item:last-child {
+    border-bottom: none;
+}
+
+.icon-container {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+}
+
+.icon-container i {
+    font-size: 1.1rem;
+    color: var(--accent-primary);
+}
+
+.transaction-info {
+    flex: 1;
+}
+
+.transaction-info h4 {
+    margin: 0 0 0.25rem 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.transaction-info span {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.transaction-item .date {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    min-width: 80px;
+    text-align: right;
+}
+
+.transaction-item .amount {
+    font-size: 1rem;
+    font-weight: 600;
+    min-width: 80px;
+    text-align: right;
+}
+
+.transaction-item .amount.text-success {
+    color: #10b981;
+}
+
+/* Statistics Card Styles */
+.statistics-card {
+    grid-column: span 2;
+}
+
+.time-range {
+    width: auto;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+    border-radius: 6px;
+}
+
+/* Expenses Card Styles */
+.expenses-card {
+    grid-column: span 2;
+}
+
+.expense-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.expense-item:last-child {
+    border-bottom: none;
+}
+
+.expense-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+}
+
+.expense-icon i {
+    font-size: 1.1rem;
+    color: var(--accent-primary);
+}
+
+.expense-info {
+    flex: 1;
+}
+
+.category {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.progress {
+    width: 100%;
+    height: 6px;
+    background: var(--glass-bg);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+.expense-details {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.25rem;
+    min-width: 80px;
+}
+
+.expense-details .amount {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.change {
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.change.increase {
+    color: #ef4444;
+}
+
+.change.decrease {
+    color: #10b981;
+}
+
+@media (max-width: 1024px) {
+    .grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .transactions-card, .statistics-card, .expenses-card {
+        grid-column: span 1;
+    }
+}
+
+@media (max-width: 768px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+
+    .header-section {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+
+    .search-section {
+        width: 100%;
+    }
+
+    .search-container {
+        width: 100%;
+    }
+}
+</style>
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Goal gauge chart
+const goalCtx = document.getElementById('goalGauge').getContext('2d');
+new Chart(goalCtx, {
+    type: 'doughnut',
+    data: {
+        datasets: [{
+            data: [{{ target_achieved }}, {{ monthly_target|add:"0" }}],
+            backgroundColor: ['var(--accent-primary)', 'var(--glass-border)'],
+            borderWidth: 0
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '70%',
+        plugins: {
+            legend: {
+                display: false
+            }
+        }
+    }
+});
+
+// Statistics chart
+const statsCtx = document.getElementById('statisticsChart').getContext('2d');
+new Chart(statsCtx, {
+    type: 'line',
+    data: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+        datasets: [{
+            label: 'Income',
+            data: [1200, 1350, 1100, 1400, 1300, 1500],
+            borderColor: 'var(--accent-primary)',
+            backgroundColor: 'rgba(99, 102, 241, 0.1)',
+            tension: 0.4
+        }, {
+            label: 'Expenses',
+            data: [800, 950, 700, 900, 850, 1000],
+            borderColor: 'var(--accent-secondary)',
+            backgroundColor: 'rgba(139, 92, 246, 0.1)',
+            tension: 0.4
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                labels: {
+                    color: 'var(--text-primary)'
+                }
+            }
+        },
+        scales: {
+            x: {
+                ticks: {
+                    color: 'var(--text-secondary)'
+                },
+                grid: {
+                    color: 'var(--glass-border)'
+                }
+            },
+            y: {
+                ticks: {
+                    color: 'var(--text-secondary)'
+                },
+                grid: {
+                    color: 'var(--glass-border)'
+                }
+            }
+        }
+    }
+});
+
+// Transaction filtering
+document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+
+        const type = this.dataset.type;
+        document.querySelectorAll('.transaction-item').forEach(item => {
+            if (type === 'all' || item.dataset.type === type) {
+                item.style.display = 'flex';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    });
+});
+</script>
+{% endblock %}
+{% endblock %}
 }
 
 .header-section {

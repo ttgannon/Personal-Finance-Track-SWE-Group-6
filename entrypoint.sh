@@ -1,6 +1,6 @@
-# This file determines based on the environmental variable for pipeline whether
-# this is running in production or development and chooses the appropriate settings 
 #!/bin/sh
+# This file determines based on the environmental variable for pipeline whether
+# this is running in production or development and chooses the appropriate settings
 set -e
 
 echo "Applying database migrations..."

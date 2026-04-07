@@ -16,48 +16,121 @@ const OverviewPage = () => {
       .finally(() => setLoading(false));
   }, []);
 
-  return (
-    <section className="page-shell">
-      <header className="page-header">
-        <div>
-          <p className="eyebrow">WealthWise</p>
-          <h1>Financial dashboard</h1>
-        </div>
-      </header>
+  const renderChart = () => {
+    if (!summary) {
+      return null;
+    }
 
-      {loading && <p>Loading financial insights...</p>}
+    const chartItems = summary.recent_transactions.slice(0, 6);
+    const maxAmount = Math.max(1, ...chartItems.map((item) => item.amount));
+
+    return (
+      <div className="trend-chart">
+        {chartItems.map((item) => (
+          <div key={item.id} className="trend-bar">
+            <div
+              className="trend-fill"
+              style={{ height: `${(item.amount / maxAmount) * 100}%` }}
+            />
+            <span>${item.amount.toFixed(0)}</span>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  return (
+    <section className="dashboard-shell">
+      <div className="dashboard-top">
+        <div className="dashboard-copy">
+          <p className="eyebrow">Modern finance</p>
+          <h1>Smart money management with clarity and confidence</h1>
+          <p>
+            WealthWise consolidates your spending, accounts, and upcoming bills into
+            a single premium dashboard designed for market-ready presentation.
+          </p>
+        </div>
+
+        <div className="hero-card">
+          <span className="hero-label">Available balance</span>
+          <strong className="hero-value">
+            {summary ? `$${summary.total_balance.toFixed(2)}` : '--'}
+          </strong>
+          <p className="hero-note">{summary ? `${summary.current_month} snapshot` : 'Loading data...'}</p>
+        </div>
+      </div>
+
+      {loading && <p className="status-message">Loading financial insights…</p>}
       {error && <p className="error-message">{error}</p>}
 
       {summary && (
-        <div className="grid-layout">
-          <article className="panel card">
-            <h2>Balance</h2>
-            <p className="metric">${summary.total_balance.toFixed(2)}</p>
-            <p className="detail">{summary.current_month} performance snapshot</p>
-          </article>
+        <>
+          <div className="grid-layout dashboard-grid">
+            <article className="glass-card summary-card">
+              <div className="card-head">
+                <h2>Dashboard overview</h2>
+                <span className="status-pill">Live</span>
+              </div>
+              <div className="metric-grid">
+                <article className="metric-block">
+                  <p>Total balance</p>
+                  <strong>${summary.total_balance.toFixed(2)}</strong>
+                </article>
+                <article className="metric-block">
+                  <p>Open bills</p>
+                  <strong>{summary.upcoming_bills.length}</strong>
+                </article>
+                <article className="metric-block">
+                  <p>Recent transactions</p>
+                  <strong>{summary.recent_transactions.length}</strong>
+                </article>
+              </div>
+            </article>
 
-          <article className="panel card">
-            <h2>Upcoming bills</h2>
-            <ul>
-              {summary.upcoming_bills.map((bill) => (
-                <li key={bill.id}>
-                  <strong>{bill.name}</strong> • due {bill.due_date}
-                </li>
-              ))}
-            </ul>
-          </article>
+            <article className="glass-card activity-card">
+              <div className="card-head">
+                <h2>Recent cash flow</h2>
+                <p>Top six transaction values</p>
+              </div>
+              {renderChart()}
+            </article>
 
-          <article className="panel card">
-            <h2>Recent transactions</h2>
-            <ul>
-              {summary.recent_transactions.slice(0, 5).map((transaction) => (
-                <li key={transaction.id}>
-                  {transaction.description} • ${transaction.amount.toFixed(2)}
-                </li>
-              ))}
-            </ul>
-          </article>
-        </div>
+            <article className="glass-card bills-card">
+              <div className="card-head">
+                <h2>Upcoming bills</h2>
+                <p>Stay ahead of your next obligations</p>
+              </div>
+              <ul className="list-group">
+                {summary.upcoming_bills.map((bill) => (
+                  <li key={bill.id}>
+                    <span>{bill.name}</span>
+                    <strong>{bill.due_date}</strong>
+                  </li>
+                ))}
+              </ul>
+            </article>
+          </div>
+
+          <div className="grid-layout data-grid">
+            <article className="glass-card table-card">
+              <div className="card-head">
+                <h2>Latest activity</h2>
+                <p>Recent spending and income highlights</p>
+              </div>
+              <ul className="transaction-list">
+                {summary.recent_transactions.map((transaction) => (
+                  <li key={transaction.id}>
+                    <div>
+                      <span>{transaction.description}</span>
+                      <small>{transaction.date}</small>
+                    </div>
+                    <strong>${transaction.amount.toFixed(2)}</strong>
+                  </li>
+                ))}
+              </ul>
+            </article>
+          </div>
+        </>
       )}
     </section>
   );

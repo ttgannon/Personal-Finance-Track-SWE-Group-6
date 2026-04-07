@@ -1,14 +1,18 @@
 {% extends 'dashboard_base.html' %}
 {% load static %}
+{% load custom_filters %}
 
 {% block extra_head %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<link rel="stylesheet" href="{% static 'css/expenses.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-    <h2 class="mb-4">Expenses Comparison</h2>
+<div class="expenses-container">
+    <div class="glass-card">
+        <div class="card-header">
+            <h2>Expenses Comparison</h2>
+        </div>
+    </div>
 
     <!-- Hidden data for JavaScript -->
     <script id="graphData" type="application/json">
@@ -18,36 +22,271 @@
         {{ yearly_data|safe }}
     </script>
 
-   <!-- Expenses Breakdown -->
-   <h3 class="mb-4">Expenses Breakdown for {{current_date|date:"F"}}</h3>
-   <div class="row">
-       {% for expense in expense_breakdown_month %}
-       <div class="col-md-4 mb-4">
-           <div class="card expense-card" data-category="{{ expense.category|slugify }}"
-               onclick="toggleDetails('{{ expense.category|slugify }}')">
-               <div class="card-body">
-                   <div class="d-flex align-items-center mb-3">
-                       {% if expense.category == 'Housing' %}
-                       <i class="bi bi-house-door me-2"></i>
-                       {% elif expense.category == 'Food' %}
-                       <i class="bi bi-cart4 me-2"></i>
-                       {% elif expense.category == 'Transportation' %}
-                       <i class="bi bi-car-front me-2"></i>
-                       {% elif expense.category == 'Entertainment' %}
-                       <i class="bi bi-film me-2"></i>
-                       {% elif expense.category == 'Shopping' %}
-                       <i class="bi bi-bag me-2"></i>
-                       {% else %}
-                       <i class="bi bi-three-dots me-2"></i>
-                       {% endif %}
-                       <h5 class="card-title mb-0">{{ expense.category }}</h5>
-                   </div>
-                   <h3 class="mb-2">${{ expense.amount|floatformat:2 }}</h3>
-                   <div class="d-flex align-items-center">
-                       {% if expense.percentage > 0 %}
-                       <span class="text-success me-2">
-                           <i class="bi bi-arrow-up"></i>
-                       </span>
+    <!-- Expenses Breakdown -->
+    <div class="glass-card">
+        <div class="card-header">
+            <h3>Expenses Breakdown for {{current_date|date:"F"}}</h3>
+        </div>
+        <div class="grid">
+            {% for expense in expense_breakdown_month %}
+            <div class="glass-card expense-card" data-category="{{ expense.category|slugify }}"
+                onclick="toggleDetails('{{ expense.category|slugify }}')">
+                <div class="expense-header">
+                    {% if expense.category == 'Housing' %}
+                    <i class="bi bi-house-door"></i>
+                    {% elif expense.category == 'Food' %}
+                    <i class="bi bi-cart4"></i>
+                    {% elif expense.category == 'Transportation' %}
+                    <i class="bi bi-car-front"></i>
+                    {% elif expense.category == 'Entertainment' %}
+                    <i class="bi bi-film"></i>
+                    {% elif expense.category == 'Shopping' %}
+                    <i class="bi bi-bag"></i>
+                    {% else %}
+                    <i class="bi bi-three-dots"></i>
+                    {% endif %}
+                    <h4>{{ expense.category }}</h4>
+                </div>
+                <div class="expense-amount">
+                    <h3>${{ expense.amount|floatformat:2 }}</h3>
+                    <div class="expense-change">
+                        {% if expense.percentage > 0 %}
+                        <span class="change increase">
+                            <i class="bi bi-arrow-up"></i>
+                            {{ expense.percentage|floatformat:1 }}%
+                        </span>
+                        {% elif expense.percentage < 0 %}
+                        <span class="change decrease">
+                            <i class="bi bi-arrow-down"></i>
+                            {{ expense.percentage|absolute|floatformat:1 }}%
+                        </span>
+                        {% else %}
+                        <span class="change neutral">
+                            <i class="bi bi-dash"></i>
+                            0%
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: {{ expense.percentage|add:100 }}%"></div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="grid">
+        <div class="glass-card">
+            <div class="card-header">
+                <h3>Monthly Comparison</h3>
+            </div>
+            <canvas id="monthlyChart"></canvas>
+        </div>
+        <div class="glass-card">
+            <div class="card-header">
+                <h3>Yearly Overview</h3>
+            </div>
+            <canvas id="yearlyChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<style>
+.expenses-container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.expense-card {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.expense-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.expense-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.expense-header i {
+    font-size: 1.5rem;
+    color: var(--accent-primary);
+}
+
+.expense-header h4 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.expense-amount {
+    margin-bottom: 1rem;
+}
+
+.expense-amount h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.expense-change {
+    display: flex;
+    align-items: center;
+}
+
+.change {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.change.increase {
+    color: #ef4444;
+}
+
+.change.decrease {
+    color: #10b981;
+}
+
+.change.neutral {
+    color: var(--text-secondary);
+}
+
+.progress-bar {
+    width: 100%;
+    height: 6px;
+    background: var(--glass-bg);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+@media (max-width: 768px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+{% block extra_scripts %}
+<script>
+// Monthly Chart
+const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
+const graphData = JSON.parse(document.getElementById('graphData').textContent);
+
+new Chart(monthlyCtx, {
+    type: 'bar',
+    data: {
+        labels: graphData.labels,
+        datasets: [{
+            label: 'Expenses',
+            data: graphData.data,
+            backgroundColor: 'var(--accent-primary)',
+            borderColor: 'var(--accent-secondary)',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                labels: {
+                    color: 'var(--text-primary)'
+                }
+            }
+        },
+        scales: {
+            x: {
+                ticks: {
+                    color: 'var(--text-secondary)'
+                },
+                grid: {
+                    color: 'var(--glass-border)'
+                }
+            },
+            y: {
+                ticks: {
+                    color: 'var(--text-secondary)'
+                },
+                grid: {
+                    color: 'var(--glass-border)'
+                }
+            }
+        }
+    }
+});
+
+// Yearly Chart
+const yearlyCtx = document.getElementById('yearlyChart').getContext('2d');
+const yearlyData = JSON.parse(document.getElementById('yearlyData').textContent);
+
+new Chart(yearlyCtx, {
+    type: 'line',
+    data: {
+        labels: yearlyData.labels,
+        datasets: [{
+            label: 'Yearly Expenses',
+            data: yearlyData.data,
+            borderColor: 'var(--accent-primary)',
+            backgroundColor: 'rgba(99, 102, 241, 0.1)',
+            tension: 0.4
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                labels: {
+                    color: 'var(--text-primary)'
+                }
+            }
+        },
+        scales: {
+            x: {
+                ticks: {
+                    color: 'var(--text-secondary)'
+                },
+                grid: {
+                    color: 'var(--glass-border)'
+                }
+            },
+            y: {
+                ticks: {
+                    color: 'var(--text-secondary)'
+                },
+                grid: {
+                    color: 'var(--glass-border)'
+                }
+            }
+        }
+    }
+});
+
+function toggleDetails(category) {
+    // Add toggle functionality if needed
+    console.log('Toggled details for:', category);
+}
+</script>
+{% endblock %}
+{% endblock %}
                        {% else %}
                        <span class="text-danger me-2">
                            <i class="bi bi-arrow-down"></i>

@@ -8,8 +8,18 @@ export default defineConfig(({ mode }) => ({
   server: {
     port: 5173,
     proxy: {
-      '/api': 'http://localhost:8000',
-      '/accounts': 'http://localhost:8000'
+      '/api': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+        secure: false,
+        cookieDomainRewrite: 'localhost',
+      },
+      '/accounts': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+        secure: false,
+        cookieDomainRewrite: 'localhost',
+      },
     }
   },
   build: {
