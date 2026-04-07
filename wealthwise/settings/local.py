@@ -113,10 +113,19 @@ LOGOUT_REDIRECT_URL = '/accounts/login/'
 
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',
+    'http://localhost:8000',
 ]
 CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:5173',
+    'http://localhost:8000',
 ]
-CSRF_COOKIE_SAMESITE = 'None'
+CSRF_COOKIE_SAMESITE = 'Lax'
 SESSION_COOKIE_SAMESITE = 'Lax'
+
+CSRF_FAILURE_VIEW = 'accounts.views.csrf_failure'
+
+# ── Plaid ─────────────────────────────────────────────────────────────────────
+PLAID_CLIENT_ID = os.getenv('PLAID_CLIENT_ID', '')
+PLAID_SECRET    = os.getenv('PLAID_SECRET', '')
+PLAID_ENV       = os.getenv('PLAID_ENV', 'sandbox')

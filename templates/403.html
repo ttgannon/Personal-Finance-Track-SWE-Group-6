@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="auth-container" style="text-align: center;">
+    <h1 class="auth-title">WealthWise</h1>
+    <div style="font-size: 3rem; margin-bottom: 1rem;">&#128274;</div>
+    <h2 style="color: var(--text-primary); margin-bottom: 0.75rem; font-size: 1.4rem;">
+        Session Expired
+    </h2>
+    <p style="color: var(--text-secondary); margin-bottom: 2rem; line-height: 1.6;">
+        Your session token could not be verified. This usually happens after a long
+        period of inactivity. Please return to the login page and try again.
+    </p>
+    <a href="{% url 'login' %}" class="btn-primary" style="display: inline-block;">
+        Return to login
+    </a>
+</div>
+{% endblock %}

@@ -20,10 +20,16 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['wealthwise.azurewebsites.net', 'www.wealthwise.azurewebsites.net']
+_EXTRA_HOSTS = [h for h in os.getenv('ALLOWED_HOSTS', '').split(',') if h]
+ALLOWED_HOSTS = [
+    '.onrender.com',   # covers <app-name>.onrender.com and any custom domain
+    *_EXTRA_HOSTS,
+]
 
-# Add the App Service domain to trusted origins for CSRF
-CSRF_TRUSTED_ORIGINS = [f"https://{host}" for host in ALLOWED_HOSTS if host != '*'] 
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.onrender.com',
+    *[f"https://{h}" for h in _EXTRA_HOSTS],
+]
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
 
@@ -170,3 +176,10 @@ SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 
 USE_X_FORWARDED_HOST = True
+
+CSRF_FAILURE_VIEW = 'accounts.views.csrf_failure'
+
+# ── Plaid ─────────────────────────────────────────────────────────────────────
+PLAID_CLIENT_ID = os.getenv('PLAID_CLIENT_ID', '')
+PLAID_SECRET    = os.getenv('PLAID_SECRET', '')
+PLAID_ENV       = os.getenv('PLAID_ENV', 'production')

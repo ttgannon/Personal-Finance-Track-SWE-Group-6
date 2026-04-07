@@ -1,6 +1,5 @@
 from django.contrib import admin
 from django.urls import path, include
-from django.views.generic import TemplateView, RedirectView
 from accounts import views
 from accounts.views import (
     CustomLoginView, SignUpView, overview, balances, transactions,
@@ -14,9 +13,12 @@ from django.urls import reverse_lazy
 from accounts.views import deleted_transactions
 from accounts.views import restore_transaction
 
+handler404 = 'accounts.views.handler404'
+handler500 = 'accounts.views.handler500'
+
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', RedirectView.as_view(url='/accounts/login/', permanent=False), name='home'),
+    path('', home, name='home'),
     path('api/', include('accounts.urls')),
     path('overview/', overview, name='overview'),
     path('accounts/login/', CustomLoginView.as_view(), name='login'),

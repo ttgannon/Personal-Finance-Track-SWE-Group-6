@@ -9,14 +9,18 @@ export interface BankAccount {
 
 export interface TransactionSummary {
   id: number;
-  description: string;
+  item_name: string;
+  shop_name: string;
   amount: number;
   date: string;
+  transaction_type: string;
+  category: number;
 }
 
 export interface BillSummary {
   id: number;
-  name: string;
+  item_name: string;
+  amount: number;
   due_date: string;
 }
 

@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="auth-container" style="text-align: center;">
+    <h1 class="auth-title">WealthWise</h1>
+    <div style="font-size: 3rem; margin-bottom: 1rem;">&#9888;&#65039;</div>
+    <h2 style="color: var(--text-primary); margin-bottom: 0.75rem; font-size: 1.4rem;">
+        Something Went Wrong
+    </h2>
+    <p style="color: var(--text-secondary); margin-bottom: 2rem; line-height: 1.6;">
+        An unexpected error occurred on our end. Please try again in a moment.
+        If the problem persists, contact support.
+    </p>
+    <a href="/" class="btn-primary" style="display: inline-block;">
+        Return to dashboard
+    </a>
+</div>
+{% endblock %}

@@ -106,7 +106,7 @@ const OverviewPage = () => {
               <ul className="list-group">
                 {summary.upcoming_bills.map((bill) => (
                   <li key={bill.id}>
-                    <span>{bill.name}</span>
+                    <span>{bill.item_name}</span>
                     <strong>{bill.due_date}</strong>
                   </li>
                 ))}
@@ -124,7 +124,7 @@ const OverviewPage = () => {
                 {summary.recent_transactions.map((transaction) => (
                   <li key={transaction.id}>
                     <div>
-                      <span>{transaction.description}</span>
+                      <span>{transaction.item_name}</span>
                       <small>{transaction.date}</small>
                     </div>
                     <strong>${transaction.amount.toFixed(2)}</strong>

@@ -20,7 +20,8 @@ class TransactionSerializer(serializers.ModelSerializer):
         model = Transaction
         fields = [
             'id',
-            'description',
+            'item_name',
+            'shop_name',
             'amount',
             'date',
             'transaction_type',
@@ -33,10 +34,9 @@ class BillSerializer(serializers.ModelSerializer):
         model = Bill
         fields = [
             'id',
-            'name',
+            'item_name',
             'amount',
             'due_date',
-            'status',
         ]
 
 
@@ -46,8 +46,6 @@ class GoalSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'title',
-            'category',
-            'target_amount',
+            'monthly_target',
             'achieved_amount',
-            'deadline',
         ]
