@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
-import type { OverviewSummary } from '../types';
-import { apiFetch } from '../hooks/useApi';
+import { useEffect, useState } from "react";
+import type { OverviewSummary } from "../types";
+import { apiFetch } from "../hooks/useApi";
 
 const OverviewPage = () => {
   const [summary, setSummary] = useState<OverviewSummary | null>(null);
@@ -8,7 +8,7 @@ const OverviewPage = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    apiFetch<OverviewSummary>('/api/overview/')
+    apiFetch<OverviewSummary>("/api/overview/")
       .then((data) => {
         setSummary(data);
       })
@@ -46,17 +46,20 @@ const OverviewPage = () => {
           <p className="eyebrow">Modern finance</p>
           <h1>Smart money management with clarity and confidence</h1>
           <p>
-            WealthWise consolidates your spending, accounts, and upcoming bills into
-            a single premium dashboard designed for market-ready presentation.
+            WealthWise consolidates your spending, accounts, and upcoming bills
+            into a single premium dashboard designed for market-ready
+            presentation.
           </p>
         </div>
 
         <div className="hero-card">
           <span className="hero-label">Available balance</span>
           <strong className="hero-value">
-            {summary ? `$${summary.total_balance.toFixed(2)}` : '--'}
+            {summary ? `$${summary.total_balance.toFixed(2)}` : "--"}
           </strong>
-          <p className="hero-note">{summary ? `${summary.current_month} snapshot` : 'Loading data...'}</p>
+          <p className="hero-note">
+            {summary ? `${summary.current_month} snapshot` : "Loading data..."}
+          </p>
         </div>
       </div>
 

@@ -1,13 +1,13 @@
-import { useEffect, useMemo, useState } from 'react';
-import type { BankAccount } from '../types';
-import { apiFetch } from '../hooks/useApi';
+import { useEffect, useMemo, useState } from "react";
+import type { BankAccount } from "../types";
+import { apiFetch } from "../hooks/useApi";
 
 const AccountsPage = () => {
   const [accounts, setAccounts] = useState<BankAccount[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    apiFetch<BankAccount[]>('/api/accounts/').then((data) => {
+    apiFetch<BankAccount[]>("/api/accounts/").then((data) => {
       setAccounts(data);
       setLoading(false);
     });
@@ -15,7 +15,7 @@ const AccountsPage = () => {
 
   const totalBalance = useMemo(
     () => accounts.reduce((sum, account) => sum + account.balance, 0),
-    [accounts]
+    [accounts],
   );
 
   return (
@@ -52,7 +52,7 @@ const AccountsPage = () => {
                 <p className="account-bank">{account.bank_name}</p>
                 <div className="account-details">
                   <span>${account.balance.toFixed(2)}</span>
-                  <small>{account.masked_account_number ?? '•••• ••••'}</small>
+                  <small>{account.masked_account_number ?? "•••• ••••"}</small>
                 </div>
               </article>
             ))}
