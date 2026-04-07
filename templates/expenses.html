@@ -1,166 +1,175 @@
 {% extends 'dashboard_base.html' %}
 {% load static %}
+{% load custom_filters %}
+{% block title %} — Expenses{% endblock %}
+{% block page_title %}Expenses{% endblock %}
+{% block page_subtitle %}Spending analysis and budget tracking{% endblock %}
 
 {% block extra_head %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<link rel="stylesheet" href="{% static 'css/expenses.css' %}">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-    <h2 class="mb-4">Expenses Comparison</h2>
+<!-- Hidden data -->
+<script id="graphData"  type="application/json">{{ graph_data|safe }}</script>
+<script id="yearlyData" type="application/json">{{ yearly_data|safe }}</script>
 
-    <!-- Hidden data for JavaScript -->
-    <script id="graphData" type="application/json">
-        {{ graph_data|safe }}
-    </script>
-    <script id="yearlyData" type="application/json">
-        {{ yearly_data|safe }}
-    </script>
+<div class="animate-in">
 
-   <!-- Expenses Breakdown -->
-   <h3 class="mb-4">Expenses Breakdown for {{current_date|date:"F"}}</h3>
-   <div class="row">
-       {% for expense in expense_breakdown_month %}
-       <div class="col-md-4 mb-4">
-           <div class="card expense-card" data-category="{{ expense.category|slugify }}"
-               onclick="toggleDetails('{{ expense.category|slugify }}')">
-               <div class="card-body">
-                   <div class="d-flex align-items-center mb-3">
-                       {% if expense.category == 'Housing' %}
-                       <i class="bi bi-house-door me-2"></i>
-                       {% elif expense.category == 'Food' %}
-                       <i class="bi bi-cart4 me-2"></i>
-                       {% elif expense.category == 'Transportation' %}
-                       <i class="bi bi-car-front me-2"></i>
-                       {% elif expense.category == 'Entertainment' %}
-                       <i class="bi bi-film me-2"></i>
-                       {% elif expense.category == 'Shopping' %}
-                       <i class="bi bi-bag me-2"></i>
-                       {% else %}
-                       <i class="bi bi-three-dots me-2"></i>
-                       {% endif %}
-                       <h5 class="card-title mb-0">{{ expense.category }}</h5>
-                   </div>
-                   <h3 class="mb-2">${{ expense.amount|floatformat:2 }}</h3>
-                   <div class="d-flex align-items-center">
-                       {% if expense.percentage > 0 %}
-                       <span class="text-success me-2">
-                           <i class="bi bi-arrow-up"></i>
-                       </span>
-                       {% else %}
-                       <span class="text-danger me-2">
-                           <i class="bi bi-arrow-down"></i>
-                       </span>
-                       {% endif %}
-                   </div>
+  <!-- ── Category budget cards ── -->
+  <div style="margin-bottom:1.5rem;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem;">
+      <h2 style="font-size:1.05rem;font-weight:700;">
+        Spending Breakdown — <span style="color:var(--accent);">{{ current_date|date:"F Y" }}</span>
+      </h2>
+    </div>
+    <div class="grid-3 animate-in animate-in-delay-1">
+      {% for expense in expense_breakdown_month %}
+      <div class="card glow animate-in" style="animation-delay:{{ forloop.counter0 }}00ms;">
+        <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.9rem;">
+          <div style="width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:0.9rem;
+            {% cycle 'background:rgba(99,102,241,0.15);color:#6366f1' 'background:rgba(16,185,129,0.15);color:#10b981' 'background:rgba(245,158,11,0.15);color:#f59e0b' 'background:rgba(239,68,68,0.15);color:#ef4444' 'background:rgba(6,182,212,0.15);color:#06b6d4' 'background:rgba(139,92,246,0.15);color:#8b5cf6' %}">
+            {% if expense.category == 'Housing' %}<i class="bi bi-house-door"></i>
+            {% elif expense.category == 'Food' %}<i class="bi bi-cart4"></i>
+            {% elif expense.category == 'Transportation' %}<i class="bi bi-car-front"></i>
+            {% elif expense.category == 'Entertainment' %}<i class="bi bi-film"></i>
+            {% elif expense.category == 'Shopping' %}<i class="bi bi-bag"></i>
+            {% else %}<i class="bi bi-three-dots"></i>{% endif %}
+          </div>
+          <span style="font-size:0.88rem;font-weight:600;color:var(--text);">{{ expense.category }}</span>
+          <span style="margin-left:auto;font-size:0.72rem;
+            {% if expense.percentage > 0 %}color:var(--red);{% elif expense.percentage < 0 %}color:var(--green);{% else %}color:var(--muted);{% endif %}">
+            {% if expense.percentage > 0 %}↑{% elif expense.percentage < 0 %}↓{% else %}—{% endif %}
+            {{ expense.percentage|absolute|floatformat:1 }}%
+          </span>
+        </div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:1.3rem;font-weight:800;color:var(--text);margin-bottom:0.75rem;">
+          ${{ expense.amount|floatformat:2 }}
+        </div>
 
-                   {% for cat in category_data %}
-                   {% if cat.name == expense.category %}
-                   <div class="d-flex justify-content-between align-items-center mt-2">
-                       <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
-                           data-bs-target="#budgetModal{{ cat.id }}">
-                           {% if cat.budget %} Edit Budget {% else %} Set Budget {% endif %}
-                       </button>
-                       <span class="text-muted">${{ cat.spent }} / ${{ cat.budget|default:"–" }}</span>
-                   </div>
-
-                   {% if cat.budget %}
-                   <div class="progress mt-2">
-                       <div class="progress-bar 
-        {% if cat.percent >= 100 %}
-           bg-danger
-        {% elif cat.percent >= 75 %}
-           bg-warning
+        <!-- Budget row -->
+        {% for cat in category_data %}
+        {% if cat.name == expense.category %}
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem;">
+          <span style="font-size:0.7rem;color:var(--muted);">
+            ${{ cat.spent|floatformat:0 }} / {% if cat.budget %}${{ cat.budget }}{% else %}no budget{% endif %}
+          </span>
+          <button class="btn btn-ghost btn-sm" data-modal-open="budgetModal{{ cat.id }}" style="font-size:0.68rem;padding:0.15rem 0.5rem;">
+            {% if cat.budget %}Edit{% else %}Set{% endif %} Budget
+          </button>
+        </div>
+        {% if cat.budget %}
+        <div class="progress-track" style="height:4px;">
+          <div class="progress-fill {% if cat.percent >= 100 %}red{% elif cat.percent >= 75 %}yellow{% else %}green{% endif %}"
+               style="width:{{ cat.percent|floatformat:0|default:'0' }}%;"></div>
+        </div>
+        {% if cat.spent >= cat.budget %}
+        <div style="font-size:0.7rem;color:var(--yellow);margin-top:0.4rem;">⚠ Budget limit reached</div>
+        {% endif %}
         {% else %}
-           bg-success
-        {% endif %}" role="progressbar" style="width: {{ cat.percent|floatformat:0|default:'0' }}%;"
-                           aria-valuenow="{{ cat.percent }}" aria-valuemin="0" aria-valuemax="100">
-                           {{ cat.percent }}%
-                       </div>
-                   </div>
+        <div class="progress-track" style="height:4px;"><div class="progress-fill" style="width:0%;"></div></div>
+        {% endif %}
+        {% endif %}
+        {% endfor %}
+      </div>
+      {% empty %}
+      <div class="card" style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--muted);">
+        No expenses recorded this month.
+      </div>
+      {% endfor %}
+    </div>
+  </div>
 
-                   {% if cat.spent >= cat.budget %}
-                   <div class="alert alert-warning mt-2 py-1 px-2" role="alert" style="font-size: 0.875rem;">
-                       ⚠ You’ve reached your budget for {{ cat.name }}!
-                   </div>
-                   {% endif %}
-                   {% endif %}
-                   {% endif %}
-                   {% endfor %}
-               </div>
+  <!-- ── Charts ── -->
+  <div class="grid-2 animate-in animate-in-delay-3">
+    <div class="card">
+      <div class="card-header"><h3><i class="bi bi-bar-chart" style="color:var(--accent);margin-right:0.4rem;"></i>Monthly Expenses</h3></div>
+      <div style="position:relative;height:220px;"><canvas id="monthlyChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><h3><i class="bi bi-graph-up" style="color:var(--accent2);margin-right:0.4rem;"></i>Yearly Overview</h3></div>
+      <div style="position:relative;height:220px;"><canvas id="yearlyChart"></canvas></div>
+    </div>
+  </div>
 
-               <!-- Expense Details -->
-               <div id="{{ expense.category|slugify }}-details" class="expense-details">
-                   <hr>
-                   <h6>Recent Transactions</h6>
-                   <div class="table-responsive">
-                       <table class="table table-sm">
-                           <thead>
-                               <tr>
-                                   <th>Date</th>
-                                   <th>Item</th>
-                                   <th>Shop</th>
-                                   <th>Amount</th>
-                               </tr>
-                           </thead>
-                           <tbody>
-                               {% for detail in expense.details %}
-                               <tr>
-                                   <td>{{ detail.date }}</td>
-                                   <td>{{ detail.item_name }}</td>
-                                   <td>{{ detail.shop_name }}</td>
-                                   <td>${{ detail.amount|floatformat:2 }}</td>
-                               </tr>
-                               {% endfor %}
-                           </tbody>
-                       </table>
-                   </div>
-               </div>
-           </div>
-       </div>
-
-       {% endfor %}
-   </div>
-   {% for cat in category_data %}
-   <div class="modal fade" id="budgetModal{{ cat.id }}" tabindex="-1" aria-labelledby="budgetModalLabel{{ cat.id }}"
-       aria-hidden="true">
-       <div class="modal-dialog">
-           <form method="POST" action="{% url 'set_budget' cat.id %}">
-               {% csrf_token %}
-               <div class="modal-content">
-                   <div class="modal-header">
-                       <h5 class="modal-title" id="budgetModalLabel{{ cat.id }}">Set Budget for {{ cat.name }}</h5>
-                       <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                   </div>
-                   <div class="modal-body">
-                       <input type="number" class="form-control" name="amount" placeholder="Enter amount" required>
-                   </div>
-                   <div class="modal-footer">
-                       <button type="submit" class="btn btn-primary">Save</button>
-                   </div>
-               </div>
-           </form>
-       </div>
-   </div>
-   {% endfor %}
-</div>
-<!-- Monthly Comparison Graph -->
-<div class="card mb-4">
-   <div class="card-body">
-       <div class="d-flex justify-content-between align-items-center mb-3">
-           <h5 class="card-title">Total Expenses</h5>
-           <select id="timeRangeSelect" class="form-select" style="width: auto;">
-               <option value="monthly">Monthly View</option>
-               <option value="yearly">Yearly View</option>
-           </select>
-       </div>
-       <div class="chart-container">
-           <canvas id="expensesChart"></canvas>
-       </div>
-   </div>
-</div>
 </div>
 
-<script src="{% static 'js/expenses.js' %}"></script>
+<!-- ══════ BUDGET MODALS ══════ -->
+{% for cat in category_data %}
+<div class="modal-overlay" id="budgetModal{{ cat.id }}">
+  <div class="modal-box" style="max-width:380px;">
+    <div class="modal-head">
+      <h3>Set Budget — {{ cat.name }}</h3>
+      <button class="modal-close" data-modal-close="budgetModal{{ cat.id }}">&times;</button>
+    </div>
+    <form method="post" action="{% url 'set_budget' cat.id %}">
+      {% csrf_token %}
+      <div class="form-group">
+        <label class="form-label">Monthly Budget ($)</label>
+        <input type="number" class="form-control" name="amount"
+          placeholder="Enter amount" {% if cat.budget %}value="{{ cat.budget }}"{% endif %} required>
+      </div>
+      <div class="modal-foot">
+        <button type="button" class="btn btn-ghost" data-modal-close="budgetModal{{ cat.id }}">Cancel</button>
+        <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Save Budget</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endfor %}
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const chartDefaults = {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: { label: ctx => ' $' + ctx.raw.toFixed(2) } }
+    },
+    scales: {
+      x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#8892a4', font: { size: 10 } } },
+      y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#8892a4', font: { size: 10 }, callback: v => '$' + v } }
+    }
+  };
+
+  const gd = JSON.parse(document.getElementById('graphData').textContent || '{}');
+  if (gd.labels && document.getElementById('monthlyChart')) {
+    new Chart(document.getElementById('monthlyChart'), {
+      type: 'bar',
+      data: {
+        labels: gd.labels,
+        datasets: [{
+          data: gd.values || [],
+          backgroundColor: 'rgba(99,102,241,0.7)',
+          borderRadius: 6, borderSkipped: false,
+          hoverBackgroundColor: 'rgba(139,92,246,0.9)'
+        }]
+      },
+      options: chartDefaults
+    });
+  }
+
+  const yd = JSON.parse(document.getElementById('yearlyData').textContent || '{}');
+  if (yd.labels && document.getElementById('yearlyChart')) {
+    new Chart(document.getElementById('yearlyChart'), {
+      type: 'line',
+      data: {
+        labels: yd.labels,
+        datasets: [{
+          data: yd.values || [],
+          borderColor: '#8b5cf6',
+          backgroundColor: 'rgba(139,92,246,0.08)',
+          tension: 0.4, fill: true,
+          pointBackgroundColor: '#8b5cf6',
+          pointRadius: 4,
+        }]
+      },
+      options: chartDefaults
+    });
+  }
+});
+</script>
 {% endblock %}

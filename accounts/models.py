@@ -20,6 +20,8 @@ class BankAccount(models.Model):
         ('mastercard', 'Mastercard'),
         ('other', 'Other')
     ], default='other')
+    plaid_account_id = models.CharField(max_length=200, blank=True, default='')
+    plaid_item_id    = models.CharField(max_length=200, blank=True, default='')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -39,7 +41,7 @@ class Bill(models.Model):
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     due_date = models.DateField()
     last_charge = models.DateField(null=True, blank=True)
-    logo_url = models.URLField(max_length=500)
+    logo_url = models.URLField(max_length=500, blank=True, default='')
     website_url = models.URLField(max_length=500, blank=True, null=True)
     
     def save(self, *args, **kwargs):
@@ -107,6 +109,7 @@ class Transaction(models.Model):
 
     is_deleted = models.BooleanField(default=False)
     deleted_at = models.DateTimeField(null=True, blank=True)
+    plaid_transaction_id = models.CharField(max_length=200, blank=True, default='', db_index=True)
 
     def is_expired(self):
         if not self.deleted_at:
@@ -175,3 +178,18 @@ class Budgets(models.Model):
 
     def __str__(self):
         return f'{self.user.username} - {self.category.name} - ${self.amount}'
+
+
+class PlaidItem(models.Model):
+    """Represents one linked institution (bank) via Plaid."""
+    user             = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='plaid_items')
+    access_token     = models.CharField(max_length=500)
+    item_id          = models.CharField(max_length=200, unique=True)
+    institution_id   = models.CharField(max_length=200, blank=True, default='')
+    institution_name = models.CharField(max_length=200, blank=True, default='Connected Bank')
+    cursor           = models.TextField(blank=True, default='')  # transactions/sync pagination cursor
+    created_at       = models.DateTimeField(auto_now_add=True)
+    updated_at       = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.institution_name} — {self.user.username}"

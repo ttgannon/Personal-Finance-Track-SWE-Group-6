@@ -1,24 +1,30 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="auth-container">
-    <h1 class="auth-title">WealthWise</h1>
-    <h4 class="text-center mb-4">Sign in to your account</h4>
-    
-    <form method="post">
-        {% csrf_token %}
-        {% if form.errors %}
-            <div class="alert alert-danger">
-                Your username and password didn't match. Please try again.
-            </div>
-        {% endif %}
-        <input type="text" name="username" class="form-control" placeholder="Username">
-        <input type="password" name="password" class="form-control" placeholder="Password">
-        <button type="submit" class="btn btn-primary">Sign in</button>
-    </form>
-    
-    <div class="auth-links mt-3">
-        <small>Don't have an account? <a href="{% url 'register' %}">Sign up here</a></small>
-    </div>
+<h1 class="auth-title">Welcome back</h1>
+<p class="auth-subtitle">Sign in to your WealthWise account</p>
+
+<form method="post">
+  {% csrf_token %}
+  {% if form.errors %}
+  <div class="alert alert-danger">
+    Incorrect username or password. Please try again.
+  </div>
+  {% endif %}
+
+  <div class="form-group">
+    <label class="form-label">Username</label>
+    <input type="text" name="username" class="form-control" placeholder="your_username" autocomplete="username" autofocus>
+  </div>
+  <div class="form-group">
+    <label class="form-label">Password</label>
+    <input type="password" name="password" class="form-control" placeholder="••••••••" autocomplete="current-password">
+  </div>
+
+  <button type="submit" class="btn-primary">Sign in →</button>
+</form>
+
+<div class="auth-link-row">
+  Don't have an account? <a href="{% url 'register' %}">Create one</a>
 </div>
-{% endblock %} 
+{% endblock %}

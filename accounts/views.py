@@ -6,7 +6,7 @@ from django.views.generic import CreateView
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.db.models import Q
-from .forms import CustomUserCreationForm, CustomPasswordChangeForm
+from .forms import CustomUserCreationForm, CustomPasswordChangeForm, CustomAuthenticationForm
 from .models import BankAccount, Bill, Transaction, Goal, Category, Budgets
 import random
 from datetime import datetime, timedelta
@@ -19,17 +19,24 @@ from django.db.models import Sum
 from django.contrib import messages
 from datetime import timedelta
 
+def home(request):
+    if request.user.is_authenticated:
+        return redirect('overview')
+    else:
+        return redirect('login')
+
 class CustomLoginView(LoginView):
     template_name = 'registration/login.html'
+    form_class = CustomAuthenticationForm
     redirect_authenticated_user = True
     
     def get_success_url(self):
-        return reverse_lazy('app')
+        return reverse_lazy('overview')
 
 class SignUpView(CreateView):
     form_class = CustomUserCreationForm
     template_name = 'registration/register.html'
-    success_url = reverse_lazy('app')
+    success_url = reverse_lazy('overview')
     
     def form_valid(self, form):
         user = form.save()
@@ -143,20 +150,24 @@ def overview(request):
 
 @login_required
 def balances(request):
-    accounts = BankAccount.objects.filter(user=request.user)
+    from django.conf import settings as django_settings
+    from .models import PlaidItem
+
+    accounts     = BankAccount.objects.filter(user=request.user)
+    plaid_items  = PlaidItem.objects.filter(user=request.user)
     current_date = timezone.now().strftime('%B %d, %Y')
-    
-    # Get transactions for each account
-    for account in accounts:
-        account.transactions = Transaction.objects.filter(
-            user=request.user,
-            payment_method__icontains=account.masked_account_number[:4]  # Match transactions by first 4 digits
-        ).order_by('-date')[:5]  # Get last 5 transactions
-    
+
+    plaid_configured = bool(
+        getattr(django_settings, 'PLAID_CLIENT_ID', '') and
+        getattr(django_settings, 'PLAID_SECRET', '')
+    )
+
     return render(request, 'balances.html', {
-        'active_tab': 'balances',
-        'current_date': current_date,
-        'accounts': accounts
+        'active_tab':      'balances',
+        'current_date':    current_date,
+        'accounts':        accounts,
+        'plaid_items':     plaid_items,
+        'plaid_configured': plaid_configured,
     })
 
 @login_required
@@ -630,8 +641,14 @@ def delete_account(request):
             })
     return redirect('settings')
 
-def home(request):
-    return render(request, 'home.html') 
+def csrf_failure(request, reason=""):
+    return render(request, '403.html', {'reason': reason}, status=403)
+
+def handler404(request, exception=None):
+    return render(request, '404.html', status=404)
+
+def handler500(request):
+    return render(request, '500.html', status=500)
 
 from django.views.decorators.http import require_POST
 

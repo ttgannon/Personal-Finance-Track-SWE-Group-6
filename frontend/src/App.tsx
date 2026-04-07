@@ -1,7 +1,7 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
-import OverviewPage from './pages/OverviewPage';
-import AccountsPage from './pages/AccountsPage';
-import TopNav from './components/TopNav';
+import { Routes, Route, Navigate } from "react-router-dom";
+import OverviewPage from "./pages/OverviewPage";
+import AccountsPage from "./pages/AccountsPage";
+import TopNav from "./components/TopNav";
 
 function App() {
   return (
