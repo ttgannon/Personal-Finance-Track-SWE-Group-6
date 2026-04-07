@@ -1,6 +1,7 @@
 from django.contrib import admin
+from django.urls import path, include
+from django.views.generic import TemplateView
 from accounts import views
-from django.urls import path
 from accounts.views import (
     CustomLoginView, SignUpView, overview, balances, transactions,
     bills, expenses, goals, settings, add_account, add_bill, remove_bill,
@@ -15,7 +16,9 @@ from accounts.views import restore_transaction
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', overview, name='overview'),
+    path('', TemplateView.as_view(template_name='app.html'), name='app'),
+    path('api/', include('accounts.urls')),
+    path('overview/', overview, name='overview'),
     path('accounts/login/', CustomLoginView.as_view(), name='login'),
     path('accounts/register/', SignUpView.as_view(), name='register'),
     path('accounts/logout/', LogoutView.as_view(

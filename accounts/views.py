@@ -24,12 +24,12 @@ class CustomLoginView(LoginView):
     redirect_authenticated_user = True
     
     def get_success_url(self):
-        return reverse_lazy('overview')
+        return reverse_lazy('app')
 
 class SignUpView(CreateView):
     form_class = CustomUserCreationForm
     template_name = 'registration/register.html'
-    success_url = reverse_lazy('overview')
+    success_url = reverse_lazy('app')
     
     def form_valid(self, form):
         user = form.save()

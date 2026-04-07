@@ -4,11 +4,11 @@ WealthWise is a full stack web application that helps users budget, save, and me
 
 ### Frontend
 
-We use Django templating based on Figma designs.
+The frontend is now a Vite-powered React + TypeScript single-page application. The new architecture separates the UI from Django templates and consumes REST API endpoints from the backend.
 
 ### Backend
 
-This project uses Django and Python. It hosts user data in a database managed with PostgreSQL and retrieves financial data with the Plaid API.
+This project uses Django and Python. It hosts user data in a database managed with PostgreSQL and exposes secure REST endpoints through Django REST Framework.
 
 ### DevOps
 
@@ -28,7 +28,19 @@ Add your own values for `POSTGRES_DB`, `POSTGRES_USER`, and `POSTGRES_PASSWORD` 
 
 #### Using Docker
 
-If you've got Docker installed on your computer, run `docker compose up --build`. This will spin up the database and Django, and you can visit the app at `http://localhost:8000/`. You're done!
+If you've got Docker installed on your computer, run `docker compose up --build`. The Docker build now also compiles the React frontend and serves the production bundle from Django static files. Visit the app at `http://localhost:8000/`.
+
+#### Developing the frontend locally
+
+From the repo root, run:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Then open `http://localhost:5173` to work on the React UI with live reload. API requests are proxied to Django at `http://localhost:8000`.
 
 #### Using Virtual Environment
 
